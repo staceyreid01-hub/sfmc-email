@@ -1,0 +1,52 @@
+%%[
+
+SET @firstName = [FirstName]
+SET @interest =  [Interest]
+SET @bResortsID = [BeautifulResortsID]
+
+/* LOGIC FOR FIRST NAME CLEANING  */
+
+IF NOT EMPTY(@firstName) THEN 
+  SET @firstNameTrim = Trim(@firstName)
+  SET @finalName = Propercase(@firstNameTrim)
+ELSE
+  SET @finalName = "Guest"
+ENDIF
+
+/* PACKAGE LEVEL AND POINTS EARNED FIELDS FROM BW ADDITIONAL PACKAGE INFO DE */
+SET @bwAddrows = LookupRows("BW_Additional_Package_Information", "BeautifulResortsID", @bResortsID)
+
+SET @rowCount = rowcount(@bwAddrows)
+
+IF @rowCount > 0 THEN
+
+SET @row = row(@bwAddrows,1) /* get row #1 */
+SET @pointsEarned = field(@row, "PointsEarned")
+SET @packageLevel = field(@row, "PackageLevel")
+ELSE
+
+RaiseError("No venue was found")
+
+ENDIF
+
+/* LOGIC FOR DISCOUNT OFFER */
+If @packageLevel == "Platinum" AND @pointsEarned >= "250" THEN
+  SET @bmessage = "As one of our most valued Platinum Members, your loyalty has earned you more than recognition—it’s unlocked an exclusive reward. With over 250 points accumulated, you now qualify for a special 15% discount on our premium packages at Beautiful Waters Resort."
+ENDIF
+
+/* LOGIC FOR DYNAMIC MESSAGE */
+
+IF @interest == "Stingrays" THEN
+  SET @message = "🌊 Stingray Encounter Experience
+ get up close and personal with gentle stingrays in their natural habitat. This unforgettable interaction combines education with pure magic as these graceful creatures glide around you in the shallows."
+ELSEIF @interest == "Snorkeling" THEN
+  SET @message = "🤿 Snorkeling Paradise Package
+ explore vibrant coral reefs teeming with tropical fish in crystal-clear waters. Our expert guides will lead you to the most spectacular underwater gardens, where every dive reveals new wonders."
+ELSE
+  SET @message = "🐬 Dolphin Discovery Adventure
+ create memories that will last a lifetime swimming alongside playful dolphins. Watch these intelligent marine mammals in their element while learning about their fascinating behaviors from our marine biologists."
+
+ ENDIF
+ENDIF
+
+]%%
